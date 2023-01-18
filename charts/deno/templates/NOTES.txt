@@ -1,2 +1,2 @@
 go check {{ .Values.deno.ingress.hosts  }}
-caca
+crotte
