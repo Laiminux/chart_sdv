@@ -1,2 +1,3 @@
 go check {{ .Values.deno.ingress.hosts  }}
 crotte
+penser à aller check le fichier values.yml pour des informations concernant les différents fields à remplir
