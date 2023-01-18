@@ -24,8 +24,6 @@ spec:
         {{- toYaml .Values.deno.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.deno.securityContext | nindent 12 }}
           image: "{{ .Values.deno.image.repository }}:{{ .Values.deno.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.deno.image.pullPolicy }}
           ports:
