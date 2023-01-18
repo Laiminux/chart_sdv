@@ -109,6 +109,8 @@ deno:
 
 
 mariadb:
+  nameOverride: ""
+
   replicaCount: 1
 
   image:

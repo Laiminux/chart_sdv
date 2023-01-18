@@ -13,9 +13,6 @@ spec:
    {{- range .Values.mariadb.persistence.pv.accessModes }}
     - {{ . | quote }}
    {{- end }}
-  claimRef:
-    name: {{ .Values.mariadb.persistence.pvc.existingClaim | default .Values.mariadb.persistence.pvc.name }}
-    namespace: default
   hostPath:
     path: {{ .Values.mariadb.persistence.pv.hostPath }}
   persistentVolumeReclaimPolicy: {{ .Values.mariadb.persistence.pv.persistentVolumeReclaimPolicy }}

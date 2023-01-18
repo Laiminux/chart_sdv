@@ -2,16 +2,13 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: "{{ .Values.deno.persistence.pv.name | default "denopv" }}"
+  name: "{{ .Values.deno.persistence.pv.name | default .Release.Name }}"
   labels:
    {{- include "oe.labels" . | nindent 4 }}
 spec:
   storageClassName: ""
   capacity:
     storage: {{ .Values.deno.persistence.pv.storage }}
-  claimRef:
-    name: {{ .Values.deno.persistence.pvc.existingClaim | default .Values.deno.persistence.pvc.name }}
-    namespace: default
   accessModes:
   {{- range .Values.mariadb.persistence.pv.accessModes }}
     - {{ . | quote }}

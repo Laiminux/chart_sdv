@@ -1,1 +1,1 @@
-ntm
+go check {{ .Values.deno.ingress.hosts  }}

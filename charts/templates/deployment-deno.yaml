@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{ default .Release.Name }}-deno"
+  name: "{{ default .Release.Name }}"
   labels:
-    app.kubernetes.io/name: deno
+    app.kubernetes.io/name: "{{ default .Release.Name }}-deno"
 spec:
   {{- if not .Values.deno.autoscaling.enabled }}
   replicas: {{ .Values.deno.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: deno
+      app.kubernetes.io/name: "{{ default .Release.Name }}-deno"
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: deno
+        app.kubernetes.io/name: "{{ default .Release.Name }}-deno"
     spec:
       {{- with .Values.deno.imagePullSecrets }}
       imagePullSecrets:

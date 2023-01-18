@@ -15,5 +15,4 @@ spec:
   resources:
     requests:
       storage: {{ .Values.deno.persistence.pvc.storage }}
-  volumeName: {{ .Values.deno.persistence.pv.existingStorage | default .Values.deno.persistence.pv.name }}
 {{- end }}

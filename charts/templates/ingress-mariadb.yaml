@@ -1,5 +1,5 @@
 {{- if .Values.mariadb.ingress.enabled -}}
-{{- $fullName := default .Release.Name -}}
+{{- $fullName := "maria-db" -}}
 {{- $svcPort := .Values.mariadb.service.port -}}
 {{- if and .Values.mariadb.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.mariadb.ingress.annotations "kubernetes.io/ingress.class") }}

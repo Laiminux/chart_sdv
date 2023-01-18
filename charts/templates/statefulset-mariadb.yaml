@@ -1,24 +1,21 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: maria-db
+  name: "{{ .Release.Name }}-maria"
   labels:
-    {{- include "oe.labels" . | nindent 4 }}
+    app: "{{ .Release.Name }}-maria"
 spec:
   {{- if not .Values.mariadb.autoscaling.enabled }}
   replicas: {{ .Values.mariadb.replicaCount }}
   {{- end }}
+  serviceName: "maria-db"
   selector:
     matchLabels:
-      {{- include "oe.selectorLabels" . | nindent 6 }}
+      app: "{{ .Release.Name }}-maria"
   template:
     metadata:
-      {{- with .Values.mariadb.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "oe.selectorLabels" . | nindent 8 }}
+        app: "{{ .Release.Name }}-maria"
     spec:
       {{- with .Values.mariadb.imagePullSecrets }}
       imagePullSecrets:
@@ -26,8 +23,6 @@ spec:
       {{- end }}
       containers:
         - name: maria-db
-          securityContext:
-            {{- toYaml .Values.mariadb.securityContext | nindent 12 }}
           image: "{{ .Values.mariadb.image.repository }}:{{ .Values.mariadb.image.tag }}"
           imagePullPolicy: {{ .Values.mariadb.image.pullPolicy }}
           ports:
@@ -43,8 +38,16 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.mariadb.persistence.volumes.mountPath }}
               name: {{ .Values.mariadb.persistence.volumes.name | default .Release.Name }}
-      volumes:
-        - name: {{ .Values.mariadb.persistence.volumes.name | default .Release.Name }}
-          persistentVolumeClaim:
-            claimName: {{ .Values.mariadb.persistence.pvc.existingClaim | default .Values.mariadb.persistence.pvc.name }}
+  volumeClaimTemplates:
+  - metadata:
+     name: {{ .Values.mariadb.persistence.volumes.name | default .Release.Name }}
+    spec:
+      storageClassName: ""
+      accessModes:
+        {{- range .Values.mariadb.persistence.pv.accessModes }}
+        - {{ . | quote }}
+        {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.mariadb.persistence.pvc.storage }}
       {{- end }}
