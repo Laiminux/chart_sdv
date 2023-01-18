@@ -1,0 +1,19 @@
+{{- if and .Values.deno.persistence.enabled (not .Values.deno.persistence.pvc.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ .Values.deno.persistence.pvc.name | default "deno-pvc" }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+   {{- include "oe.labels" . | nindent 4 }}
+spec:
+  storageClassName: ""
+  accessModes:
+    {{- range .Values.mariadb.persistence.pv.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.deno.persistence.pvc.storage }}
+  volumeName: {{ .Values.deno.persistence.pv.existingStorage | default .Values.deno.persistence.pv.name }}
+{{- end }}

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ default .Release.Name }}-deno"
+  labels:
+    app.kubernetes.io/name: deno
+spec:
+  {{- if not .Values.deno.autoscaling.enabled }}
+  replicas: {{ .Values.deno.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: deno
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: deno
+    spec:
+      {{- with .Values.deno.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.deno.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.deno.securityContext | nindent 12 }}
+          image: "{{ .Values.deno.image.repository }}:{{ .Values.deno.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.deno.image.pullPolicy }}
+          ports:
+          - containerPort: 8080
+          resources:
+            {{- toYaml .Values.deno.resources | nindent 12 }}
+      {{- if .Values.deno.persistence.enabled }}
+          volumeMounts:
+            - mountPath: {{ .Values.deno.persistence.volumes.mountPath }}
+              name: {{ .Values.deno.persistence.volumes.name | default .Release.Name }}
+      volumes:
+        - name: {{ .Values.deno.persistence.volumes.name | default .Release.Name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.deno.persistence.pvc.existingClaim | default .Values.deno.persistence.pvc.name }}
+      {{- end }}

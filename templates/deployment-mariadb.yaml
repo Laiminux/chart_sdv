@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maria-db
+  labels:
+    {{- include "oe.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.mariadb.autoscaling.enabled }}
+  replicas: {{ .Values.mariadb.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "oe.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.mariadb.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "oe.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.mariadb.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: maria-db
+          securityContext:
+            {{- toYaml .Values.mariadb.securityContext | nindent 12 }}
+          image: "{{ .Values.mariadb.image.repository }}:{{ .Values.mariadb.image.tag }}"
+          imagePullPolicy: {{ .Values.mariadb.image.pullPolicy }}
+          ports:
+          -  containerPort: 3306
+          resources:
+            {{- toYaml .Values.mariadb.resources | nindent 12 }}
+          env:
+          - name: MARIADB_ROOT_PASSWORD
+            value: {{ .Values.mariadb.auth.rootPassword }}
+          - name: MARIADB_DATABASE
+            value: {{ .Values.mariadb.auth.database }}
+      {{- if .Values.mariadb.persistence.enabled }}
+          volumeMounts:
+            - mountPath: {{ .Values.mariadb.persistence.volumes.mountPath }}
+              name: {{ .Values.mariadb.persistence.volumes.name | default .Release.Name }}
+      volumes:
+        - name: {{ .Values.mariadb.persistence.volumes.name | default .Release.Name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.mariadb.persistence.pvc.existingClaim | default .Values.mariadb.persistence.pvc.name }}
+      {{- end }}

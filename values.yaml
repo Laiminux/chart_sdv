@@ -1,0 +1,209 @@
+# Default values for oe.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+deno:
+  replicaCount: 1
+
+  nameOverride: ""
+  fullnameOverride: ""
+
+  image:
+    repository: codebuds/deno-webserver
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+  imagePullSecrets: []
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    name: ""
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  persistence:
+    enabled: true
+    pv:
+      existingStorage: ""
+      name: "denopv"
+      storage: "8Gi"
+      persistentVolumeReclaimPolicy: "Delete"
+      accessModes:
+        - ReadWriteOnce
+      hostPath: "/data/deno/deno-webserver"
+    pvc:
+      existingClaim: ""
+      name: "denopvc"
+      accessModes:
+        - ReadWriteOnce
+      storage: "8Gi"
+      volumeName: ""
+    volumes:
+        name: ""
+        mountPath: "/srv/app/pvc"
+
+  service:
+    name: ""
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+
+  ingress:
+    enabled: true
+    className: ""
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
+      cert-manager.io/issuer: "letsencrypt-staging"
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: grafana.mathieu-l.hexagonal.wtf.hexagonal.wtf
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: quickstart-example-tls
+        hosts:
+          - grafana.mathieu-l.hexagonal.wtf.hexagonal.wtf
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+
+mariadb:
+  replicaCount: 1
+
+  image:
+    repository: mariadb
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+
+  imagePullSecrets: []
+
+  auth:
+    rootPassword: "asecret"
+    database: "logs"
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+  # runAsUser: 1000
+  persistence:
+    enabled: true
+    pv:
+      existingStorage: ""
+      name: "mariapv"
+      storage: "8Gi"
+      persistentVolumeReclaimPolicy: "Delete"
+      accessModes:
+        - ReadWriteOnce
+      hostPath: "/data/deno/mariadb"
+    pvc:
+      existingClaim: ""
+      name: "mariapvc"
+      accessModes:
+        - ReadWriteOnce
+      storage: "8Gi"
+    volumes:
+      name: ""
+      mountPath: "/var/lib/mysql"
+
+  service:
+    name: ""
+    type: ClusterIP
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+  #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.deno.service.name | default "deno-svc" }}
+  labels:
+    {{- include "oe.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.deno.service.type }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.deno.service.port }}
+      targetPort: {{ .Values.deno.service.targetPort }}
+      name: http
+  selector:
+    app.kubernetes.io/name: deno

@@ -1,0 +1,22 @@
+{{- if and .Values.mariadb.persistence.enabled (not .Values.mariadb.persistence.pv.existingStorage) }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ .Values.mariadb.persistence.pv.name | default "mariapv" }}"
+  labels:
+   {{- include "oe.labels" . | nindent 4 }}
+spec:
+  storageClassName: ""
+  capacity:
+    storage: {{ .Values.mariadb.persistence.pv.storage }}
+  accessModes:
+   {{- range .Values.mariadb.persistence.pv.accessModes }}
+    - {{ . | quote }}
+   {{- end }}
+  claimRef:
+    name: {{ .Values.mariadb.persistence.pvc.existingClaim | default .Values.mariadb.persistence.pvc.name }}
+    namespace: default
+  hostPath:
+    path: {{ .Values.mariadb.persistence.pv.hostPath }}
+  persistentVolumeReclaimPolicy: {{ .Values.mariadb.persistence.pv.persistentVolumeReclaimPolicy }}
+{{- end }}

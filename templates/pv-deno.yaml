@@ -1,0 +1,22 @@
+{{- if and .Values.deno.persistence.enabled (not .Values.deno.persistence.pv.existingStorage) }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ .Values.deno.persistence.pv.name | default "denopv" }}"
+  labels:
+   {{- include "oe.labels" . | nindent 4 }}
+spec:
+  storageClassName: ""
+  capacity:
+    storage: {{ .Values.deno.persistence.pv.storage }}
+  claimRef:
+    name: {{ .Values.deno.persistence.pvc.existingClaim | default .Values.deno.persistence.pvc.name }}
+    namespace: default
+  accessModes:
+  {{- range .Values.mariadb.persistence.pv.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  hostPath:
+    path: {{ .Values.deno.persistence.pv.hostPath }}
+  persistentVolumeReclaimPolicy: {{ .Values.deno.persistence.pv.persistentVolumeReclaimPolicy }}
+{{- end }}
