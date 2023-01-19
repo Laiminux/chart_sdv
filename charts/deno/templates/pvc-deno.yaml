@@ -2,12 +2,13 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ .Values.deno.persistence.pvc.name | default "deno-pvc" }}
+  name: "{{ .Values.deno.persistence.pvc.name | default .Release.Name }}-ws"
   namespace: {{ .Release.Namespace }}
   labels:
    {{- include "oe.labels" . | nindent 4 }}
 spec:
   storageClassName: ""
+  volumeName: {{ if .Values.deno.persistence.pv.existingStorage }}{{ .Values.deno.persistence.pv.existingStorage }}-ws{{ else  if .Values.deno.persistence.pv.name }}{{ .Values.deno.persistence.pv.name}}-ws{{ else }}{{ default .Release.Name }}-ws{{ end }}
   accessModes:
     {{- range .Values.mariadb.persistence.pv.accessModes }}
     - {{ . | quote }}

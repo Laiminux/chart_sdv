@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 deno:
-  replicaCount: 1
+  replicaCount: 3
 
   nameOverride: ""
   fullnameOverride: ""
@@ -27,8 +27,10 @@ deno:
 
   podAnnotations: {}
 
-  podSecurityContext: {}
-    # fsGroup: 2000
+  podSecurityContext:
+    #runAsUser: 1000
+    #runAsGroup: 1000
+    #fsGroup: 1000
 
   securityContext: {}
     # capabilities:
@@ -41,8 +43,8 @@ deno:
   persistence:
     enabled: true
     pv:
-      existingStorage: ""
-      name: "denopv"
+      existingStorage: "" # if you have already an existing
+      name: ""
       storage: "8Gi"
       persistentVolumeReclaimPolicy: "Delete"
       accessModes:
@@ -50,7 +52,7 @@ deno:
       hostPath: "/data/deno/deno-webserver"
     pvc:
       existingClaim: ""
-      name: "denopvc"
+      name: ""
       accessModes:
         - ReadWriteOnce
       storage: "8Gi"
@@ -66,7 +68,7 @@ deno:
     targetPort: 8080
 
   ingress:
-    enabled: true
+    enabled: false
     className: ""
     annotations:
       kubernetes.io/ingress.class: "nginx"
@@ -106,6 +108,10 @@ deno:
   tolerations: []
 
   affinity: {}
+
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 5
 
 
 mariadb:
@@ -149,7 +155,7 @@ mariadb:
     enabled: true
     pv:
       existingStorage: ""
-      name: "mariapv"
+      name: ""
       storage: "8Gi"
       persistentVolumeReclaimPolicy: "Delete"
       accessModes:
@@ -157,7 +163,7 @@ mariadb:
       hostPath: "/data/deno/mariadb"
     pvc:
       existingClaim: ""
-      name: "mariapvc"
+      name: ""
       accessModes:
         - ReadWriteOnce
       storage: "8Gi"
@@ -209,3 +215,7 @@ mariadb:
   tolerations: []
 
   affinity: {}
+
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 5

@@ -1,7 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{ default .Release.Name }}"
+  name: "{{ default .Release.Name }}-ws"
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: "{{ default .Release.Name }}-deno"
 spec:
@@ -22,6 +23,10 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.deno.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: init-db
+          image: busybox:1.28
+          command: [ 'sh', '-c', "until nc {{ .Values.mariadb.service.name | default .Release.Name }} -z 3306; do echo waiting for myservice;done" ]
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.deno.image.repository }}:{{ .Values.deno.image.tag | default .Chart.AppVersion }}"
@@ -30,6 +35,33 @@ spec:
           - containerPort: 8080
           resources:
             {{- toYaml .Values.deno.resources | nindent 12 }}
+          env:
+            - name: MARIADB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ default .Release.Name }}-maria"
+                  key: hostname
+            - name: MARIADB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ default .Release.Name }}-maria"
+                  key: username
+            - name: MARIADB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ default .Release.Name }}-maria"
+                  key: database
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ default .Release.Name }}-maria"
+                  key: password
+          livenessProbe:
+            httpGet:
+              path: /probe?probeType=liveness
+              port: {{ .Values.deno.service.port }}
+            initialDelaySeconds: {{ .Values.deno.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.deno.livenessProbe.periodSeconds }}
       {{- if .Values.deno.persistence.enabled }}
           volumeMounts:
             - mountPath: {{ .Values.deno.persistence.volumes.mountPath }}
@@ -37,5 +69,5 @@ spec:
       volumes:
         - name: {{ .Values.deno.persistence.volumes.name | default .Release.Name }}
           persistentVolumeClaim:
-            claimName: {{ .Values.deno.persistence.pvc.existingClaim | default .Values.deno.persistence.pvc.name }}
+            claimName: "{{ .Values.deno.persistence.pvc.name | default .Release.Name }}-ws"
       {{- end }}

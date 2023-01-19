@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: "{{ .Release.Name }}-maria"
+  namespace: {{ .Release.Namespace }}
   labels:
     app: "{{ .Release.Name }}-maria"
 spec:
@@ -30,17 +31,31 @@ spec:
           resources:
             {{- toYaml .Values.mariadb.resources | nindent 12 }}
           env:
-          - name: MARIADB_ROOT_PASSWORD
-            value: {{ .Values.mariadb.auth.rootPassword }}
-          - name: MARIADB_DATABASE
-            value: {{ .Values.mariadb.auth.database }}
+            - name: MARIADB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ default .Release.Name }}-maria"
+                  key: database
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ default .Release.Name }}-maria"
+                  key: password
+          readinessProbe:
+            exec:
+              command:
+                - ./bin/sh
+                - -c
+                - "mysqladmin status -u root -p$MARIADB_ROOT_PASSWORD"
+            initialDelaySeconds: {{ .Values.mariadb.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.mariadb.readinessProbe.periodSeconds }}
       {{- if .Values.mariadb.persistence.enabled }}
           volumeMounts:
             - mountPath: {{ .Values.mariadb.persistence.volumes.mountPath }}
-              name: {{ .Values.mariadb.persistence.volumes.name | default .Release.Name }}
+              name: "{{ .Values.mariadb.persistence.volumes.name | default .Release.Name }}-maria"
   volumeClaimTemplates:
   - metadata:
-     name: {{ .Values.mariadb.persistence.volumes.name | default .Release.Name }}
+     name: "{{ .Values.mariadb.persistence.volumes.name | default .Release.Name }}-maria"
     spec:
       storageClassName: ""
       accessModes:

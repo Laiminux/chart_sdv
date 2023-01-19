@@ -1,5 +1,5 @@
 {{- if .Values.deno.ingress.enabled -}}
-{{- $fullName := (.Values.deno.service.name | default .Release.Name ) -}}
+{{- $fullName := (.Values.deno.service.name | default .Release.Name) -}}
 {{- $svcPort := .Values.deno.service.port -}}
 {{- if and .Values.deno.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.deno.ingress.annotations "kubernetes.io/ingress.class") }}
@@ -10,6 +10,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: "{{ .Release.Name }}-ingress"
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "oe.labels" . | nindent 4 }}
   {{- with .Values.deno.ingress.annotations }}
@@ -49,5 +50,4 @@ spec:
               {{- end }}
           {{- end }}
     {{- end }}
-
 {{- end }}

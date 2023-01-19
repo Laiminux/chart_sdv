@@ -1,7 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.deno.service.name | default .Release.Name }}
+  name: "{{ .Values.deno.service.name | default .Release.Name }}-ws"
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "oe.labels" . | nindent 4 }}
 spec:
