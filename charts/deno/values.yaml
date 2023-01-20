@@ -5,9 +5,6 @@
 deno:
   replicaCount: 3
 
-  nameOverride: ""
-  fullnameOverride: ""
-
   image:
     repository: codebuds/deno-webserver
     pullPolicy: Always
@@ -27,10 +24,7 @@ deno:
 
   podAnnotations: {}
 
-  podSecurityContext:
-    #runAsUser: 1000
-    #runAsGroup: 1000
-    #fsGroup: 1000
+  podSecurityContext: {}
 
   securityContext: {}
     # capabilities:
@@ -43,7 +37,7 @@ deno:
   persistence:
     enabled: true
     pv:
-      existingStorage: "" # if you have already an existing
+      existingStorage: "" # if you have already an existing pv if this is filled it will override everything below in pv
       name: ""
       storage: "8Gi"
       persistentVolumeReclaimPolicy: "Delete"
@@ -51,14 +45,14 @@ deno:
         - ReadWriteOnce
       hostPath: "/data/deno/deno-webserver"
     pvc:
-      existingClaim: ""
+      existingClaim: "" # if you have already an existing pvc if this is filled it will override everything below in pvc
       name: ""
       accessModes:
         - ReadWriteOnce
       storage: "8Gi"
       volumeName: ""
     volumes:
-        name: ""
+        name: "" # change volume mount name
         mountPath: "/srv/app/pvc"
 
   service:
@@ -70,20 +64,20 @@ deno:
   ingress:
     enabled: false
     className: ""
-    annotations:
+    annotations: # those are example you need to change this with your own dns
       kubernetes.io/ingress.class: "nginx"
       cert-manager.io/issuer: "letsencrypt-staging"
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
-    hosts:
-      - host: grafana.mathieu-l.hexagonal.wtf.hexagonal.wtf
+    hosts: # those are example you need to change this with your own dns and yo
+      - host: example.io
         paths:
           - path: /
             pathType: ImplementationSpecific
     tls:
       - secretName: quickstart-example-tls
         hosts:
-          - grafana.mathieu-l.hexagonal.wtf.hexagonal.wtf
+          - example.io
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -110,13 +104,11 @@ deno:
   affinity: {}
 
   livenessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 5
+    initialDelaySeconds: 10 # change this if pods take a long time to start
+    periodSeconds: 5 # same for this
 
 
 mariadb:
-  nameOverride: ""
-
   replicaCount: 1
 
   image:
@@ -128,6 +120,7 @@ mariadb:
   imagePullSecrets: []
 
   auth:
+    username: "" # by default user will be root but for security purpose please change it
     rootPassword: "asecret"
     database: "logs"
 
@@ -154,16 +147,14 @@ mariadb:
   persistence:
     enabled: true
     pv:
-      existingStorage: ""
+      existingStorage: "" # if you have already an existing pv if this is filled it will override everything below in pv
       name: ""
       storage: "8Gi"
       persistentVolumeReclaimPolicy: "Delete"
       accessModes:
         - ReadWriteOnce
       hostPath: "/data/deno/mariadb"
-    pvc:
-      existingClaim: ""
-      name: ""
+    pvc: # since we use statefulset name and existingClaim is not available
       accessModes:
         - ReadWriteOnce
       storage: "8Gi"
@@ -175,7 +166,7 @@ mariadb:
     name: ""
     type: ClusterIP
 
-  ingress:
+  ingress: # we discourage exposing your database on a public address for security purpose
     enabled: false
     className: ""
     annotations: {}

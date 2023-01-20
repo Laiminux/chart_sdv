@@ -41,6 +41,13 @@ spec:
                 secretKeyRef:
                   name: "{{ default .Release.Name }}-maria"
                   key: password
+            {{- if .Values.mariadb.auth.username }}
+            - name: MARIADB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ default .Release.Name }}-maria"
+                  key: username
+            {{- end }}
           readinessProbe:
             exec:
               command:

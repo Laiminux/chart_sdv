@@ -1,3 +1,2 @@
-go check {{ .Values.deno.ingress.hosts  }}
-crotte
-penser à aller check le fichier values.yml pour des informations concernant les différents fields à remplir
+helm install <releaseName> <chart>
+Checkout values file https://github.com/Laiminux/chart_sdv/blob/master/charts/deno/values.yaml for complementary information on how to deploy this project to fit your purposes
